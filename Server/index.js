@@ -7,7 +7,7 @@ const app = express();
 
 mongoose.connect('mongodb+srv://maccie:Octagon112@testcluster-ahfz1.gcp.mongodb.net/test?retryWrites=true&w=majority');
 mongoose.connection.once('open', () => {
-    console.log('Dbase connection: succes');
+    console.log('Dbase connection: success');
 });
 
 app.use('/graphql', graphqlHTTP({
@@ -16,6 +16,6 @@ app.use('/graphql', graphqlHTTP({
 }));
 
 app.listen(4000, () => {
-    console.log('listening on port 3000')
+    console.log('listening on port 4000')
 })
 

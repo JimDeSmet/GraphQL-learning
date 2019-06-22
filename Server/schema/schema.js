@@ -1,6 +1,6 @@
 const graphql = require('graphql');
 const _ = require('lodash');
-const Blogpost = require('../models/blogpost');
+const Post = require('../models/post');
 const User = require('../models/user');
 
 const { 
@@ -10,8 +10,8 @@ const {
     GraphQLID,
     GraphQLList } = graphql;
 
-const BlogpostType = new GraphQLObjectType({
-    name: 'Blogpost',
+const PostType = new GraphQLObjectType({
+    name: 'Post',
     fields: () => ({
         id: { type: GraphQLID },
         title: { type: GraphQLString},
@@ -32,10 +32,10 @@ const UserType = new GraphQLObjectType({
         firstName: { type: GraphQLString},
         lastName: { type: GraphQLString},
         email: { type: GraphQLString},
-        blogPosts: {
-            type: new GraphQLList(BlogpostType),
+        posts: {
+            type: new GraphQLList(PostType),
             resolve(parent, args){
-               return Blogpost.find({userId: parent.id});
+               return Post.find({userId: parent.id});
             }
         }
     })
@@ -44,11 +44,11 @@ const UserType = new GraphQLObjectType({
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
-        blogpost: {
-            type: BlogpostType,
+        post: {
+            type: PostType,
             args: {id: { type: GraphQLID}},
             resolve(parent, args){
-                return Blogpost.findById(args.id);
+                return Post.findById(args.id);
             }
         },
         user: {
@@ -58,10 +58,10 @@ const RootQuery = new GraphQLObjectType({
               return User.findById(args.id);
             }
         },
-        blogPosts : {
-            type: new GraphQLList(BlogpostType),
+        posts : {
+            type: new GraphQLList(PostType),
             resolve(parent, args){
-              return Blogpost.find({});
+              return Post.find({});
             }
         },
         users: {
@@ -92,20 +92,20 @@ const Mutation = new GraphQLObjectType({
                 return user.save();
             }
         },
-        addBlogpost: {
-            type: BlogpostType,
+        addPost: {
+            type: PostType,
             args: {
                 title: {type: GraphQLString},
                 content: {type: GraphQLString},
                 userId: {type: GraphQLID}
             },
             resolve(parent, args){
-                let blogpost = new Blogpost({
+                let post = new Post({
                     title: args.title,
                     content: args.content,
                     userId: args.userId
             });
-            return blogpost.save();
+            return post.save();
         }
         }
     }
