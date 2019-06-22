@@ -1,13 +1,14 @@
-const graphql = require('graphql');
-const _ = require('lodash');
-const Post = require('../models/post');
-const User = require('../models/user');
+const graphql = require('graphql')
+const Post = require('../models/post')
+const User = require('../models/user')
+const Comment = require('../models/comment')
 
 const { 
     GraphQLObjectType, 
     GraphQLString, 
     GraphQLSchema, 
     GraphQLID,
+    GraphQLNonNull,
     GraphQLList } = graphql;
 
 const PostType = new GraphQLObjectType({
@@ -20,6 +21,32 @@ const PostType = new GraphQLObjectType({
             type: UserType,
             resolve(parent, args){
                return User.findById(parent.userId);
+            }
+        },
+        comments: {
+            type: new GraphQLList(CommentType),
+            resolve(parent, args){
+                return Comment.find({postId: parent.id});
+            }
+        }
+    })
+});
+
+const CommentType = new GraphQLObjectType({
+    name: 'Comment',
+    fields: () => ({
+        id: { type: GraphQLID },
+        text: { type: GraphQLString},
+        user: {
+            type: UserType,
+            resolve(parent, args){
+               return User.findById(parent.userId);
+            }
+        },
+        post: {
+            type: PostType,
+            resolve(parent, args){
+                return Post.findById(parent.postId);
             }
         }
     })
@@ -37,6 +64,12 @@ const UserType = new GraphQLObjectType({
             resolve(parent, args){
                return Post.find({userId: parent.id});
             }
+        },
+        comments: {
+            type: new GraphQLList(CommentType),
+            resolve(parent, args){
+                return Comment.find({userId: parent.id});
+            }
         }
     })
 });
@@ -51,6 +84,13 @@ const RootQuery = new GraphQLObjectType({
                 return Post.findById(args.id);
             }
         },
+        comment: {
+            type: CommentType,
+            args: {id: { type: GraphQLID}},
+            resolve(parent, args){
+              return Comment.findById(args.id);
+            }
+        },
         user: {
             type: UserType,
             args: {id: { type: GraphQLID}},
@@ -62,6 +102,12 @@ const RootQuery = new GraphQLObjectType({
             type: new GraphQLList(PostType),
             resolve(parent, args){
               return Post.find({});
+            }
+        },
+        comments : {
+            type: new GraphQLList(CommentType),
+            resolve(parent, args){
+              return Comment.find({});
             }
         },
         users: {
@@ -92,6 +138,15 @@ const Mutation = new GraphQLObjectType({
                 return user.save();
             }
         },
+        deleteUser: {
+            type: UserType,
+            args: {
+                id: {type: new GraphQLNonNull(GraphQLString)}
+            },
+            resolve(parent, {id}){
+                return User.findByIdAndRemove(id);
+            }
+        },
         addPost: {
             type: PostType,
             args: {
@@ -104,9 +159,43 @@ const Mutation = new GraphQLObjectType({
                     title: args.title,
                     content: args.content,
                     userId: args.userId
-            });
-            return post.save();
-        }
+                });
+                return post.save();
+            }
+        },
+        deletePost: {
+            type: PostType,
+            args: {
+                id: {type: new GraphQLNonNull(GraphQLString)}
+            },
+            resolve(parent, {id}){
+                return Post.findByIdAndRemove(id);
+            }
+        },
+        addComment: {
+            type: CommentType,
+            args: {
+                text: {type: GraphQLString},
+                userId: {type: GraphQLID},
+                postId: {type: GraphQLID}
+            },
+            resolve(parent, args){
+                let comment = new Comment({
+                    text: args.text,
+                    userId: args.userId,
+                    postId: args.postId
+                });
+                return comment.save();
+            }
+        },
+        deleteComment: {
+            type: CommentType,
+            args: {
+                id: {type: new GraphQLNonNull(GraphQLString)}
+            },
+            resolve(parent, {id}){
+                return Comment.findByIdAndRemove(id);
+            }
         }
     }
 })
