@@ -81,39 +81,39 @@ const RootQuery = new GraphQLObjectType({
             type: PostType,
             args: {id: { type: GraphQLID}},
             resolve(parent, args){
-                return Post.findById(args.id);
+                return Post.findById(args.id)
             }
         },
         comment: {
             type: CommentType,
             args: {id: { type: GraphQLID}},
             resolve(parent, args){
-              return Comment.findById(args.id);
+              return Comment.findById(args.id)
             }
         },
         user: {
             type: UserType,
             args: {id: { type: GraphQLID}},
             resolve(parent, args){
-              return User.findById(args.id);
+              return User.findById(args.id)
             }
         },
         posts : {
             type: new GraphQLList(PostType),
             resolve(parent, args){
-              return Post.find({});
+              return Post.find({})
             }
         },
         comments : {
             type: new GraphQLList(CommentType),
             resolve(parent, args){
-              return Comment.find({});
+              return Comment.find({})
             }
         },
         users: {
             type: new GraphQLList(UserType),
             resolve(parent, args){
-              return User.find({});
+              return User.find({})
             }
         }
     }
